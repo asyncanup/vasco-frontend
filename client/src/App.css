@@ -1,0 +1,154 @@
+.App {
+  font-family: sans-serif;
+}
+
+.App-header {
+  background-color: #222;
+  padding: 20px;
+  color: white;
+  text-align: center;
+}
+
+.App-title {
+  font-size: 1.5em;
+  padding: 10px 0;
+}
+
+.App-config {
+  margin-top: 10px;
+  height: 25px;
+}
+
+.App-config-permalink {
+  text-decoration: none;
+}
+
+.App-config-permalink-icon {
+  font-size: 1.2em;
+  padding: 10px;
+  vertical-align: top;
+}
+
+.App-config-db-url-view {
+  border-bottom: 1px solid grey;
+  padding: 2px 4px;
+  vertical-align: middle;
+  cursor: pointer;
+  color: lightgrey;
+}
+
+.App-config-db-url-input {
+  border: 1px solid grey;
+  border-radius: 3px;
+  padding: 5px;
+  background-color: #222;
+  color: white;
+  width: 300px;
+  text-align: center;
+}
+
+.App-services {
+  margin: 10px auto;
+  width: 600px;
+}
+
+.App-services-header {
+  font-size: 1.4em;
+  padding: 20px 0;
+}
+
+.App-services-data {
+  display: flex;
+}
+
+.App-services-list {
+  margin-left: 20px;
+  width: 430px;
+}
+
+.App-service-instances thead th,
+.App-services-list thead th {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+.App-services-list thead tr {
+  
+}
+
+.App-services-list-header-name {
+  text-align: left;
+  width: 240px;
+  padding-left: 10px;
+}
+
+.App-services-list-header-status {
+  width: 70px;
+}
+
+.App-services-list-header-num-instances {
+  width: 100px;
+}
+
+.App-service-instances tbody td,
+.App-services-list tbody td {
+  position: relative;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  font-size: 0.9em;
+  vertical-align: middle;
+}
+
+.App-services-list-name {
+  padding-left: 10px;
+}
+
+.App-services-list-status {
+  width: 15px;
+  height: 15px;
+  margin: 0 auto;
+}
+
+.App-services-list-status-icon {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1px solid lightgrey;
+}
+
+.App-services-list-num-instances {
+  text-align: center;
+}
+
+.App-services-list-selected {
+  background-color: #f7f6f6;
+}
+
+.App-services-list-selection-indicator-on::before {
+  content: "";
+  width: 0px;
+  height: 0px;
+  border: 15px solid transparent;
+  position: absolute;
+  border-right: 15px solid #ccc;
+  left: -20px;
+  top: -0.5px;
+}
+
+.App-services-list-header-selection-indicator,
+.App-services-list-selection-indicator-on,
+.App-services-list-selection-indicator-off {
+  border-right: 2px solid #ccc;
+}
+
+.App-service-instances {
+  width: 130px;
+  margin-left: 17px;
+}
+
+.App-service-instances thead th,
+.App-service-instances tbody td {
+  text-align: left;
+}

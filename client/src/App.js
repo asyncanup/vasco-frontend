@@ -1,37 +1,63 @@
+/*global EventSource */
 import React, { Component } from "react";
 import autobind from "autobind-decorator";
-import SocketIOClient from "socket.io-client";
 
 import "reset-css";
 import "./App.css";
+
+const endpointExpirations = {};
 
 class App extends Component {
   state = {
     databaseURL: "asd",
     incompleteDatabaseURL: "",
     isEditingDatabaseURL: false,
-    services: {
-      "accounts-api@1.0.1": {
-        "0.0.0.0:80": true,
-        "0.0.0.0:81": true,
-      },
-      "auth-api@1.0.0": {
-        "0.0.0.0:83": true,
-      },
-      "product-feature-api@2.5.1": {
-      },
-    },
-    selectedService: "auth-api@1.0.0",
+    services: {},
+    selectedService: "",
   }
   
   componentDidMount() {
-    const socket = SocketIOClient();
-    socket.on("sadd", (serviceKey, url) => {
-      
-    });
-    socket.on("set", (aliveKey, alive, _, expiry) => {
-      
-    });
+    const serverEvents = new EventSource('data');
+    serverEvents.addEventListener('message', e => console.log(e));
+    serverEvents.addEventListener('set', e => {
+      // eslint-disable-next-line
+      const [ aliveKey, serviceId, EX, expiry ] = JSON.parse(e.data);
+      if (!aliveKey.startsWith('alive.')) { return; }
+
+      const { services } = this.state;
+      const endpoint = aliveKey.split('alive.')[1];
+      const serviceEndpoints = services[serviceId] || [];
+      if (serviceEndpoints.indexOf(endpoint) === -1) {
+        this.setState({
+          services: {
+            ...services,
+            [serviceId]: serviceEndpoints.concat(endpoint)
+          }
+        });
+      }
+      if (endpointExpirations[endpoint]) {
+        clearTimeout(endpointExpirations[endpoint]);
+      }
+      endpointExpirations[endpoint] = setTimeout(() => {
+        const { services } = this.state;
+        this.setState({
+          services: {
+            ...services,
+            [serviceId]: services[serviceId].filter(url => url !== endpoint)
+          }
+        });
+      }, (+expiry + 1) * 1000);
+    }, false);
+    
+    serverEvents.addEventListener('open', function(e) {
+      console.log('connected');
+    }, false)
+  
+    serverEvents.addEventListener('error', function(e) {
+      if (e.readyState === EventSource.CLOSED) {
+        console.error('disconnected');
+      }
+    }, false)
   }
   
   editDatabaseURL(e) {
@@ -58,7 +84,7 @@ class App extends Component {
   
   isServiceDead(serviceId) {
     const { services } = this.state;
-    return !services[serviceId] || !Object.keys(services[serviceId]).length;
+    return !services[serviceId] || !services[serviceId].length;
   }
   
   selectService(serviceId) {
@@ -122,89 +148,92 @@ class App extends Component {
             <h2 className="App-services-header">
               Services
             </h2>
-            <div className="App-services-data">
-              <table className="App-services-list">
-                <thead>
-                  <tr>
-                    <th className="App-services-list-header-status">
-                      Status
-                    </th>
-                    <th className="App-services-list-header-name">
-                      Name & Version
-                    </th>
-                    <th className="App-services-list-header-num-instances">
-                      # Instances
-                    </th>
-                    <th className="App-services-list-header-selection-indicator">
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {
-                    Object.keys(services).map(serviceId =>
-                      <tr
-                        key={ serviceId }
-                        className={
-                          selectedService === serviceId ?
-                            "App-services-list-selected" :
-                            ""
-                        }
-                        style={{
-                          cursor: this.isServiceDead(serviceId) ?
-                            "default" :
-                            "pointer"
-                        }}
-                        onClick={ () => this.selectService(serviceId) }
-                      >
-                        <td>
-                          <div className="App-services-list-status">
-                            <div
-                              className="App-services-list-status-icon"
-                              style={{
-                                backgroundColor: this.isServiceDead(serviceId) ?
-                                  '#ff5d55' :
-                                  '#72bb53'
-                              }}
-                            >
-                            </div>
-                          </div>
-                        </td>
-                        <td className="App-services-list-name">
-                          { serviceId }
-                        </td>
-                        <td className="App-services-list-num-instances">
-                          { Object.keys(services[serviceId]).length || "-"}
-                        </td>
-                        <td className={
-                          selectedService === serviceId ?
-                            "App-services-list-selection-indicator-on" :
-                            "App-services-list-selection-indicator-off"
-                        }>
-                        </td>
-                      </tr>
-                    )
-                  }
-                </tbody>
-              </table>
-              { selectedService && !this.isServiceDead(selectedService) &&
-                <table className="App-service-instances">
+            {
+              (Object.keys(services).length || null) &&
+              <div className="App-services-data">
+                <table className="App-services-list">
                   <thead>
                     <tr>
-                      <th>Instances</th>
+                      <th className="App-services-list-header-status">
+                        Status
+                      </th>
+                      <th className="App-services-list-header-name">
+                        Name & Version
+                      </th>
+                      <th className="App-services-list-header-num-instances">
+                        # Instances
+                      </th>
+                      <th className="App-services-list-header-selection-indicator">
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {
-                      Object.keys(services[selectedService]).map(url =>
-                        <tr key={url}>
-                          <td>{ url }</td>
+                      Object.keys(services).map(serviceId =>
+                        <tr
+                          key={ serviceId }
+                          className={
+                            selectedService === serviceId ?
+                              "App-services-list-selected" :
+                              ""
+                          }
+                          style={{
+                            cursor: this.isServiceDead(serviceId) ?
+                              "default" :
+                              "pointer"
+                          }}
+                          onClick={ () => this.selectService(serviceId) }
+                        >
+                          <td>
+                            <div className="App-services-list-status">
+                              <div
+                                className="App-services-list-status-icon"
+                                style={{
+                                  backgroundColor: this.isServiceDead(serviceId) ?
+                                    '#ff5d55' :
+                                    '#72bb53'
+                                }}
+                              >
+                              </div>
+                            </div>
+                          </td>
+                          <td className="App-services-list-name">
+                            { serviceId }
+                          </td>
+                          <td className="App-services-list-num-instances">
+                            { services[serviceId].length || "-"}
+                          </td>
+                          <td className={
+                            selectedService === serviceId ?
+                              "App-services-list-selection-indicator-on" :
+                              "App-services-list-selection-indicator-off"
+                          }>
+                          </td>
                         </tr>
                       )
                     }
                   </tbody>
                 </table>
-              }
-            </div>
+                { selectedService && !this.isServiceDead(selectedService) &&
+                  <table className="App-service-instances">
+                    <thead>
+                      <tr>
+                        <th>Instances</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {
+                        services[selectedService].map(url =>
+                          <tr key={url}>
+                            <td>{ url }</td>
+                          </tr>
+                        )
+                      }
+                    </tbody>
+                  </table>
+                }
+              </div>
+            }
           </section>
         }
       </div>

@@ -5,15 +5,22 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "DEBUG=vasco,vasco-frontend PORT=3000 node server.js"
+    "start": "DEBUG=vasco,vasco-frontend PORT=3000 node server.js",
+    "dev": "DEBUG=vasco,vasco-frontend PORT=3000 nodemon server.js"
   },
   "dependencies": {
-    "debug": "^3.1.0",
     "express": "^4.16.2",
-    "redis": "^2.8.0",
-    "socket.io": "^2.0.4"
+    "redis": "^2.8.0"
   },
   "keywords": [],
   "author": "Anup Bishnoi <pixelsallover@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^1.14.11"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "client/*"
+    ]
+  }
 }
